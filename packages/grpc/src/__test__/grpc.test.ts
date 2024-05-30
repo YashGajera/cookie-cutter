@@ -22,11 +22,14 @@ import {
     GrpcMetadata,
     grpcSource,
     IGrpcClientConfiguration,
+    IGrpcClientOptions,
     IGrpcConfiguration,
+    IGrpcServerOptions,
     IResponseStream,
 } from "..";
 import { sample } from "./Sample";
 
+const apiKey = "token";
 let nextPort = 56011;
 
 export interface ISampleService {
@@ -78,16 +81,23 @@ export const SampleServiceDefinition = {
     },
 };
 
-function testApp(handler: any, host?: string): CancelablePromise<void> {
+function testApp(
+    handler: any,
+    host?: string,
+    options?: IGrpcServerOptions
+): CancelablePromise<void> {
     return Application.create()
         .input()
         .add(
-            grpcSource({
-                port: nextPort,
-                host,
-                definitions: [SampleServiceDefinition],
-                skipNoStreamingValidation: true,
-            })
+            grpcSource(
+                {
+                    port: nextPort,
+                    host,
+                    definitions: [SampleServiceDefinition],
+                    skipNoStreamingValidation: true,
+                },
+                options
+            )
         )
         .done()
         .dispatch(handler)
@@ -96,13 +106,17 @@ function testApp(handler: any, host?: string): CancelablePromise<void> {
 
 async function createClient(
     host?: string,
-    config?: Partial<IGrpcClientConfiguration & IGrpcConfiguration>
+    config?: Partial<IGrpcClientConfiguration & IGrpcConfiguration>,
+    options?: string | IGrpcClientOptions
 ): Promise<ISampleService & IRequireInitialization & IDisposable> {
-    const client = grpcClient<ISampleService & IRequireInitialization & IDisposable>({
-        endpoint: `${host || "localhost"}:${nextPort++}`,
-        definition: SampleServiceDefinition,
-        ...config,
-    });
+    const client = grpcClient<ISampleService & IRequireInitialization & IDisposable>(
+        {
+            endpoint: `${host || "localhost"}:${nextPort++}`,
+            definition: SampleServiceDefinition,
+            ...config,
+        },
+        options
+    );
     return client;
 }
 
@@ -118,6 +132,29 @@ describe("gRPC source", () => {
         });
         try {
             const client = await createClient();
+            const response = await client.NoStreaming({ id: 15 });
+            expect(response).toMatchObject({ name: "15" });
+        } finally {
+            app.cancel();
+            await app;
+        }
+    });
+
+    it("serves requests with api key validation", async () => {
+        const app = testApp(
+            {
+                onNoStreaming: async (
+                    request: sample.ISampleRequest,
+                    _: IDispatchContext
+                ): Promise<sample.ISampleResponse> => {
+                    return { name: request.id.toString() };
+                },
+            },
+            undefined,
+            { apiKey }
+        );
+        try {
+            const client = await createClient(undefined, undefined, { apiKey });
             const response = await client.NoStreaming({ id: 15 });
             expect(response).toMatchObject({ name: "15" });
         } finally {
@@ -229,6 +266,29 @@ describe("gRPC source", () => {
             const client = await createClient();
             const response = client.NoStreaming({ id: 15 });
             await expect(response).rejects.toThrowError(/not implemented/);
+        } finally {
+            app.cancel();
+            await app;
+        }
+    });
+
+    it("throws error for missing/invalid api key", async () => {
+        const app = testApp(
+            {
+                onNoStreaming: async (
+                    request: sample.ISampleRequest,
+                    _: IDispatchContext
+                ): Promise<sample.ISampleResponse> => {
+                    return { name: request.id.toString() };
+                },
+            },
+            undefined,
+            { apiKey }
+        );
+        try {
+            const client = await createClient();
+            const response = client.NoStreaming({ id: 15 });
+            await expect(response).rejects.toThrowError(/Invalid API Key/);
         } finally {
             app.cancel();
             await app;

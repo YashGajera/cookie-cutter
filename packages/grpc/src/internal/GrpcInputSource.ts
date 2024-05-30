@@ -19,6 +19,7 @@ import {
     OpenTracingTagKeys,
 } from "@walmartlabs/cookie-cutter-core";
 import {
+    Metadata,
     sendUnaryData,
     Server,
     ServerCredentials,
@@ -38,7 +39,7 @@ import {
     GrpcResponseStream,
     GrpcStreamHandler,
 } from ".";
-import { GrpcMetadata, IGrpcConfiguration, IGrpcServerConfiguration } from "..";
+import { GrpcMetadata, IGrpcConfiguration, IGrpcServerConfiguration, IGrpcServerOptions } from "..";
 import { GrpcOpenTracingTagKeys } from "./helper";
 
 enum GrpcMetrics {
@@ -59,7 +60,10 @@ export class GrpcInputSource implements IInputSource, IRequireInitialization {
     private tracer: Tracer;
     private metrics: IMetrics;
 
-    constructor(private readonly config: IGrpcServerConfiguration & IGrpcConfiguration) {
+    constructor(
+        private readonly config: IGrpcServerConfiguration & IGrpcConfiguration,
+        private readonly options?: IGrpcServerOptions
+    ) {
         if (!config.skipNoStreamingValidation) {
             for (const def of config.definitions) {
                 for (const key of Object.keys(def)) {
@@ -180,7 +184,11 @@ export class GrpcInputSource implements IInputSource, IRequireInitialization {
                             if (value !== undefined) {
                                 callback(undefined, value);
                             } else if (error !== undefined) {
-                                callback(this.createError(error), null);
+                                if ((error as ServerErrorResponse).code !== undefined) {
+                                    callback(error, null);
+                                } else {
+                                    callback(this.createError(error), null);
+                                }
                             } else {
                                 callback(
                                     this.createError("not implemented", status.UNIMPLEMENTED),
@@ -198,7 +206,15 @@ export class GrpcInputSource implements IInputSource, IRequireInitialization {
                             path: method.path,
                         });
                     });
-
+                    if (this.options?.apiKey) {
+                        if (!this.isApiKeyValid(call.metadata)) {
+                            await msgRef.release(
+                                undefined,
+                                this.createError("Invalid API Key", status.UNAUTHENTICATED)
+                            );
+                            return;
+                        }
+                    }
                     if (!(await this.queue.enqueue(msgRef))) {
                         await msgRef.release(undefined, new Error("service unavailable"));
                     }
@@ -238,5 +254,10 @@ export class GrpcInputSource implements IInputSource, IRequireInitialization {
             code: code || status.UNKNOWN,
             message: error.toString(),
         };
+    }
+
+    private isApiKeyValid(meta: Metadata) {
+        const headerValue = meta.get("authorization");
+        return headerValue?.[0]?.toString() === this.options.apiKey;
     }
 }
