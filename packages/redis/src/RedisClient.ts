@@ -207,7 +207,9 @@ export class RedisClient implements IRedisClient, IRequireInitialization, IDispo
 
     public async dispose(): Promise<void> {
         this.disposeInitiated = true;
-        await this.client.quit();
+        if (this.client.isReady) {
+            await this.client.quit();
+        }
         this.client.unref();
     }
 
