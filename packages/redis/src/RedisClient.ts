@@ -207,7 +207,7 @@ export class RedisClient implements IRedisClient, IRequireInitialization, IDispo
 
     public async dispose(): Promise<void> {
         this.disposeInitiated = true;
-        // Avoid use of quit() to prevent hangs on unconnected clients beacuse it closes the client gracefully and wait for all the commands before closing. Issue: https://github.com/redis/node-redis/issues/2723
+        // Avoid use of quit() to prevent hangs on the unconnected clients beacuse it closes the client gracefully and wait for all the commands before closing. Issue: https://github.com/redis/node-redis/issues/2723
         // Immediately terminates the connection without waiting for any pending commands with disconnect().
         await this.client.disconnect();
         this.client.unref();
