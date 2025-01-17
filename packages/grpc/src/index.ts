@@ -58,12 +58,21 @@ export interface IGrpcServerConfiguration {
     readonly skipNoStreamingValidation?: boolean;
 }
 
+export interface IGrpcServerOptions {
+    readonly apiKey?: string;
+}
+
 export interface IGrpcClientConfiguration {
     readonly endpoint: string;
     readonly definition: IGrpcServiceDefinition;
     readonly connectionTimeout?: number;
     readonly requestTimeout?: number;
     readonly behavior?: Required<IComponentRuntimeBehavior>;
+}
+
+export interface IGrpcClientOptions {
+    readonly certPath?: string;
+    readonly apiKey?: string;
 }
 
 export enum GrpcMetadata {
@@ -80,7 +89,8 @@ export interface IResponseStream<TResponse> {
 }
 
 export function grpcSource(
-    configuration: IGrpcServerConfiguration & IGrpcConfiguration
+    configuration: IGrpcServerConfiguration & IGrpcConfiguration,
+    options?: IGrpcServerOptions
 ): IInputSource & IRequireInitialization {
     configuration = config.parse<IGrpcServerConfiguration & IGrpcConfiguration>(
         GrpcSourceConfiguration,
@@ -90,7 +100,7 @@ export function grpcSource(
             allocator: Buffer,
         }
     );
-    return new GrpcInputSource(configuration);
+    return new GrpcInputSource(configuration, options);
 }
 
 export function grpcMsg(operation: IGrpcServiceMethod, request: any): IMessage {
@@ -102,7 +112,7 @@ export function grpcMsg(operation: IGrpcServiceMethod, request: any): IMessage {
 
 export function grpcClient<T>(
     configuration: IGrpcClientConfiguration & IGrpcConfiguration,
-    certPath?: string
+    certPathOrOptions?: string | IGrpcClientOptions
 ): T & IRequireInitialization & IDisposable {
     configuration = config.parse<IGrpcClientConfiguration & IGrpcConfiguration>(
         GrpcClientConfiguration,
@@ -122,5 +132,8 @@ export function grpcClient<T>(
             },
         }
     );
-    return createGrpcClient<T>(configuration, certPath);
+    if (typeof certPathOrOptions === "string") {
+        certPathOrOptions = { certPath: certPathOrOptions };
+    }
+    return createGrpcClient<T>(configuration, certPathOrOptions);
 }
