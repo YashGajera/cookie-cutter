@@ -25,7 +25,6 @@ import * as jsonpatch from "fast-json-patch";
 import * as https from "https";
 import * as _ from "lodash";
 import { Span, Tags, Tracer } from "opentracing";
-import { isNullOrUndefined } from "util";
 import {
     IAdmissionReviewRequest,
     IK8sAdmissionControllerSourceConfiguration,
@@ -218,7 +217,7 @@ export class KubernetesAdmissionControllerSource implements IInputSource, IRequi
         originalObject: any,
         reviewResponse: IK8sAdmissionReviewResponse
     ): boolean {
-        if (isNullOrUndefined(reviewResponse.allowed)) {
+        if (reviewResponse.allowed === null || reviewResponse.allowed === undefined) {
             this.logger.error(
                 `Handler did not return an object with "allowed" set to a boolean. Succeeding Admission Review Request.`,
                 reviewResponse

@@ -168,7 +168,7 @@ export class AmqpSource implements IInputSource, IRequireInitialization, IDispos
     public async stop(): Promise<void> {
         this.running = false;
         if (this.loop) {
-            clearTimeout(this.loop);
+            clearTimeout(this.loop as any);
         }
         this.pipe.close();
     }

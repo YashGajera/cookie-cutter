@@ -46,7 +46,7 @@ export class IntervalSource implements IInputSource, IRequireInitialization {
 
     public async stop(): Promise<void> {
         if (this.timer !== undefined) {
-            clearTimeout(this.timer);
+            clearTimeout(this.timer as any);
             this.timer = undefined;
         }
         await this.pipe.close();

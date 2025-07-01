@@ -191,7 +191,7 @@ export class QueueInputSource implements IInputSource, IRequireInitialization {
     public async stop(): Promise<void> {
         this.running = false;
         if (this.loop) {
-            clearTimeout(this.loop);
+            clearTimeout(this.loop as any);
         }
     }
 

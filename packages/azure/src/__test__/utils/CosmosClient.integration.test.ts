@@ -20,7 +20,6 @@ import { setup, teardown } from "../integrationSetup";
 import { CosmosOutputSink } from "../../event-sourced/internal";
 import { cosmosMetadata, ICosmosDocument } from "../../utils";
 import { SpanContext } from "opentracing";
-import { isNullOrUndefined } from "util";
 
 jest.setTimeout(90000);
 
@@ -189,7 +188,7 @@ async function generateTestDocument(
         stream_id: sId ?? streamId,
         sn: sn + 1,
         event_type: "test",
-        data: isNullOrUndefined(message.payload) ? undefined : formatData(message),
+        data: message.payload === null || message.payload === undefined ? undefined : formatData(message),
         id: `${streamId}-${sn + 1}`,
         trace: new SpanContext(),
         dt: Date.now(),

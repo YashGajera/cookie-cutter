@@ -31,7 +31,7 @@ jobs:
       - name: Setup Ubuntu Node 16
         uses: actions/setup-node@v2-beta
         with:
-          node-version: "16"
+          node-version: "22"
       - name: Install Yarn 1.21.1
         run: yarn set version 1.21.1
       - name: Install Dependencies
@@ -61,7 +61,7 @@ jobs:
         if: ${{ github.event_name == 'schedule' }}
         uses: actions/setup-node@v2-beta
         with:
-          node-version: "16"
+          node-version: "22"
       - name: Install Yarn 1.21.1
         if: ${{ github.event_name == 'schedule' }}
         run: yarn set version 1.21.1
@@ -104,7 +104,7 @@ jobs:
       - name: Setup MacOS Node 16
         uses: actions/setup-node@v2-beta
         with:
-          node-version: "16"
+          node-version: "22"
       - name: Install Yarn 1.21.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -185,7 +185,7 @@ jobs:
       - name: Setup Ubuntu Node 16
         uses: actions/setup-node@v2-beta
         with:
-          node-version: "16"
+          node-version: "22"
       - name: Install Yarn 1.21.1
         run: yarn set version 1.21.1
       - name: Install Dependencies
@@ -206,7 +206,7 @@ jobs:
       - name: Setup Ubuntu Node 16
         uses: actions/setup-node@v2-beta
         with:
-          node-version: "16"
+          node-version: "22"
       - name: Install Yarn 1.21.1
         run: yarn set version 1.21.1
       - name: Install Dependencies
@@ -227,7 +227,7 @@ jobs:
       - name: Setup Ubuntu Node 16
         uses: actions/setup-node@v2-beta
         with:
-          node-version: "16"
+          node-version: "22"
       - name: Install Yarn 1.21.1
         run: yarn set version 1.21.1
       - name: Install Dependencies
@@ -248,7 +248,7 @@ jobs:
       - name: Setup Ubuntu Node 16
         uses: actions/setup-node@v2-beta
         with:
-          node-version: "16"
+          node-version: "22"
       - name: Install Yarn 1.21.1
         run: yarn set version 1.21.1
       - name: Install Dependencies
@@ -269,7 +269,7 @@ jobs:
       - name: Setup Ubuntu Node 16
         uses: actions/setup-node@v2-beta
         with:
-          node-version: "16"
+          node-version: "22"
       - name: Install Yarn 1.21.1
         run: yarn set version 1.21.1
       - name: Install Dependencies
@@ -290,7 +290,7 @@ jobs:
       - name: Setup Ubuntu Node 16
         uses: actions/setup-node@v2-beta
         with:
-          node-version: "16"
+          node-version: "22"
       - name: Install Yarn 1.21.1
         run: yarn set version 1.21.1
       - name: Install Dependencies
@@ -311,7 +311,7 @@ jobs:
       - name: Setup Ubuntu Node 16
         uses: actions/setup-node@v2-beta
         with:
-          node-version: "16"
+          node-version: "22"
       - name: Install Yarn 1.21.1
         run: yarn set version 1.21.1
       - name: Install Dependencies
@@ -334,7 +334,7 @@ jobs:
       - name: Setup Ubuntu Node 16
         uses: actions/setup-node@v2-beta
         with:
-          node-version: "16"
+          node-version: "22"
       - name: Install Yarn 1.21.1
         run: yarn set version 1.21.1
       - name: Install Dependencies

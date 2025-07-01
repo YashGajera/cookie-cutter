@@ -7,7 +7,6 @@ LICENSE file in the root directory of this source tree.
 
 import * as LRU from "lru-cache";
 import { SpanContext } from "opentracing";
-import { isString } from "util";
 import { ICacheOptions } from "..";
 import {
     IClassType,
@@ -91,7 +90,7 @@ export class CachingStateProvider<TState extends IState<TSnapshot>, TSnapshot>
                 this.callbacksDisabledFor.delete(key);
             }
         };
-        if (isString(keys)) {
+        if (typeof keys === "string") {
             fn(keys);
         } else {
             for (const key of keys) {

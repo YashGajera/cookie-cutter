@@ -475,7 +475,7 @@ export class KafkaConsumer implements IRequireInitialization, IDisposable {
             await this.admin.disconnect();
         }
         if (this.timer) {
-            clearTimeout(this.timer);
+            clearTimeout(this.timer as any);
         }
     }
 }

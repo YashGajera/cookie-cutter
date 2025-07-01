@@ -47,7 +47,7 @@ export class ConcurrentMessageProcessor extends BaseMessageProcessor implements 
     protected readonly inputQueue: BoundedPriorityQueue<MessageRef>;
     protected readonly outputQueue: BoundedPriorityQueue<IQueueItem<BufferedDispatchContext>>;
     private lastDispatchedMessageTimestamp: number;
-    private queueValidationTimer?: NodeJS.Timer | undefined;
+    private queueValidationTimer?: NodeJS.Timeout | undefined;
     private isProcessorClosed: Future<void>;
 
     public constructor(
@@ -123,7 +123,7 @@ export class ConcurrentMessageProcessor extends BaseMessageProcessor implements 
                 timer = setInterval(
                     () => this.reportStatistics(),
                     this.config.queueMetricsIntervalMs
-                );
+                ) as any;
                 timer.unref();
             }
 
@@ -151,10 +151,10 @@ export class ConcurrentMessageProcessor extends BaseMessageProcessor implements 
         } finally {
             this.isProcessorClosed.resolve();
             if (timer) {
-                clearInterval(timer);
+                clearInterval(timer as any);
             }
             if (this.queueValidationTimer) {
-                clearInterval(this.queueValidationTimer);
+                clearInterval(this.queueValidationTimer as any);
             }
         }
     }

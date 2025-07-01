@@ -5,7 +5,6 @@ This source code is licensed under the Apache 2.0 license found in the
 LICENSE file in the root directory of this source tree.
 */
 
-import { isDate, isNumber, isString } from "util";
 import { ILogger, ILoggerStructuredData, IMetadata } from "../model";
 
 export class MetadataLoggerDecorator implements ILogger {
@@ -15,7 +14,7 @@ export class MetadataLoggerDecorator implements ILogger {
         if (meta !== undefined) {
             for (const key of Object.keys(meta)) {
                 const val = meta[key];
-                if (!key.includes("sys.", 0) && (isString(val) || isNumber(val) || isDate(val))) {
+                if (!key.includes("sys.", 0) && (typeof val === "string" || typeof val === "number" || val instanceof Date)) {
                     this.fromMetadata[key] = val;
                 }
             }
