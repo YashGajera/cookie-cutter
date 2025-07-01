@@ -17,7 +17,6 @@ import {
     StateRef,
 } from "@walmartlabs/cookie-cutter-core";
 import { SpanContext } from "opentracing";
-import { isNullOrUndefined } from "util";
 import { ICosmosConfiguration, CosmosMetadata } from "../..";
 import {
     cosmosMetadata,
@@ -54,7 +53,7 @@ export class CosmosOutputSink extends CosmosOutputSinkBase implements IOutputSin
                 stream_id: state.key,
                 sn: state.seqNum + count,
                 event_type: message.message.type,
-                data: isNullOrUndefined(message.message.payload)
+                data: message.message.payload === null || message.message.payload === undefined
                     ? undefined
                     : this.formatData(message.message),
                 id: state.key,

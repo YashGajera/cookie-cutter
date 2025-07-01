@@ -21,7 +21,6 @@ import {
     StateRef,
 } from "@walmartlabs/cookie-cutter-core";
 import { SpanContext } from "opentracing";
-import { isNullOrUndefined } from "util";
 import { ICosmosQueryClient } from "../..";
 import { ICosmosDocument } from "../../utils";
 import { getCollectionInfo } from "../../utils/helpers";
@@ -68,7 +67,7 @@ export class CosmosStateProvider<TState extends IState<TSnapshot>, TSnapshot>
         }
 
         const record: ICosmosDocument = result[0];
-        if (isNullOrUndefined(record.data)) {
+        if (record.data === null || record.data === undefined) {
             return new StateRef(new this.TState(), key, record.sn);
         }
 

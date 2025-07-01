@@ -6,7 +6,6 @@ LICENSE file in the root directory of this source tree.
 */
 
 import { IOutputSink, IPublishedMessage, RetrierContext } from "@walmartlabs/cookie-cutter-core";
-import { isNullOrUndefined } from "util";
 import { ICosmosConfiguration } from "../..";
 import { cosmosMetadata, CosmosOutputSinkBase, ICosmosDocument } from "../../utils";
 
@@ -26,7 +25,7 @@ export class CosmosOutputSink
         for (const msg of output) {
             const doc: ICosmosDocument = {
                 id: msg.metadata.key,
-                encodedData: isNullOrUndefined(msg.message.payload)
+                encodedData: msg.message.payload === null || msg.message.payload === undefined
                     ? undefined
                     : this.formatData(msg.message),
                 stream_id: msg.metadata.key,

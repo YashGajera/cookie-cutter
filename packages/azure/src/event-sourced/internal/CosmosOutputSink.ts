@@ -12,7 +12,6 @@ import {
     IStoredMessage,
     RetrierContext,
 } from "@walmartlabs/cookie-cutter-core";
-import { isNullOrUndefined } from "util";
 import { ICosmosConfiguration, CosmosMetadata } from "../../";
 import { cosmosMetadata, CosmosOutputSinkBase, ICosmosDocument } from "../../utils";
 
@@ -37,7 +36,7 @@ export class CosmosOutputSink extends CosmosOutputSinkBase implements IOutputSin
             counter.set(msg.state.uniqueId, inc + 1);
             const doc: ICosmosDocument = {
                 id: `${msg.state.key}-${msg.state.seqNum + inc}`,
-                encodedData: isNullOrUndefined(msg.message.payload)
+                encodedData: msg.message.payload === null || msg.message.payload === undefined
                     ? undefined
                     : this.formatData(msg.message),
                 stream_id: msg.state.key,

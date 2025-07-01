@@ -133,11 +133,15 @@ export class InternalRetrier implements IRetrier {
         const retry = generateRetrierContext(this.behavior.retries + 1);
         do {
             try {
-                let val = func(retry);
-                if (this.isPromise(val)) {
-                    val = await (val as Promise<T>);
+                const result: Promise<T> | T = func(retry);
+                if (this.isPromise(result)) {
+                    // result is narrowed to Promise<any> by isPromise,
+                    // but we expect it to be Promise<T> contextually.
+                    // Awaiting it gives T, which the async function wraps in Promise<T>.
+                    return await (result as Promise<T>);
                 }
-                return val;
+                // result is T, which the async function wraps in Promise<T>.
+                return result;
             } catch (e) {
                 if (retry.isFinalAttempt()) {
                     throw e;
@@ -164,7 +168,7 @@ export class InternalRetrier implements IRetrier {
         );
     }
 
-    public isPromise(val: any): val is Promise<void> {
-        return val && val.then && val.catch;
+    public isPromise(val: any): val is Promise<any> {
+        return val && typeof val.then === "function" && typeof val.catch === "function";
     }
 }

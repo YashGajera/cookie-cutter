@@ -6,7 +6,6 @@ LICENSE file in the root directory of this source tree.
 */
 
 import _ = require("lodash");
-import { isNullOrUndefined } from "util";
 import { ILogger, ILoggerStructuredData } from "../model";
 
 export interface IConsoleLoggerOptions {
@@ -19,7 +18,7 @@ export class ConsoleLogger implements ILogger {
     private maxDepth: number;
 
     public constructor(options?: IConsoleLoggerOptions) {
-        this.maxDepth = options && !isNullOrUndefined(options.maxDepth) ? options.maxDepth : 10;
+        this.maxDepth = options && options.maxDepth !== null && options.maxDepth !== undefined ? options.maxDepth : 10;
     }
 
     public info(message: string, data?: ILoggerStructuredData): void {

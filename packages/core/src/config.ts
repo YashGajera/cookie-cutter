@@ -6,7 +6,7 @@ LICENSE file in the root directory of this source tree.
 */
 
 import ms = require("ms");
-import { isArray, isBoolean, isFunction, isNullOrUndefined, isNumber, isString } from "util";
+import { isArray } from "util";
 import { IClassType } from "./model";
 
 export type ValueConvertFn = (val: any) => any;
@@ -139,9 +139,9 @@ export const converters = {
     listOf: (itemConverter: ValueConvertFn, separator: string = ","): ValueConvertFn => {
         return function (val: any): any {
             let items: any[];
-            if (isNullOrUndefined(val)) {
+            if (val === null || val === undefined) {
                 items = [];
-            } else if (isString(val)) {
+            } else if (typeof val === "string") {
                 items = val
                     .split(separator)
                     .map((s) => s.trim())
@@ -161,23 +161,24 @@ export const converters = {
     },
     enum: (TEnum: any): ValueConvertFn => {
         return function (val: any): any {
-            if (isNullOrUndefined(val)) {
+            if (val === null || val === undefined) {
                 return val;
             }
 
-            if (isNumber(val)) {
+            if (typeof val === "number") {
                 return val;
             }
 
-            if (!isString(val)) {
+            if (typeof val !== "string") {
                 throw new Error(`unable to convert '${val}' of type '${typeof val}' to enum`);
             }
 
+            // typeof val === "string" is confirmed, so val.toLowerCase() is safe
             let match = Object.keys(TEnum).filter((key) => key.toLowerCase() === val.toLowerCase());
 
             if (match.length === 0) {
                 match = Object.values(TEnum).filter(
-                    (v) => isString(v) && v.toLowerCase() === val.toLowerCase()
+                    (v) => typeof v === "string" && v.toLowerCase() === val.toLowerCase()
                 ) as string[];
 
                 if (match.length === 0) {
@@ -193,16 +194,16 @@ export const converters = {
         };
     },
     number: (val: any): any => {
-        if (isNullOrUndefined(val) || isNumber(val)) {
+        if (val === null || val === undefined || typeof val === "number") {
             return val;
-        } else if (isString(val)) {
+        } else if (typeof val === "string") {
             return parseFloat(val);
         }
 
         throw new Error(`unable to convert '${val}' of type '${typeof val}' to number`);
     },
     string: (val: any): any => {
-        if (isNullOrUndefined(val)) {
+        if (val === null || val === undefined) {
             return val;
         }
 
@@ -219,7 +220,7 @@ export const converters = {
             [["e", "E", "eb", "EB", "EiB", "Ei", "ei"], Math.pow(1024, 6)],
         ];
 
-        if (isNullOrUndefined(val)) {
+        if (val === null || val === undefined) {
             return val;
         }
 
@@ -246,7 +247,7 @@ export const converters = {
         source: TimeSpanTargetUnit = TimeSpanTargetUnit.Milliseconds
     ): ValueConvertFn => {
         return function (val: any): any {
-            if (isNullOrUndefined(val)) {
+            if (val === null || val === undefined) {
                 return val;
             }
 
@@ -260,11 +261,14 @@ export const converters = {
             //                         x  ms    s   m   h   d
             const conversionFactors = [0, 1, 1000, 60, 60, 24];
 
-            let sourceTime = 0;
-            if (isNumber(val)) {
+            let sourceTime: number | undefined = 0;
+            if (typeof val === "number") {
                 sourceTime = val;
-            } else if (isString(val)) {
+            } else if (typeof val === "string") {
                 sourceTime = ms(val);
+                if (sourceTime === undefined) {
+                    throw new Error(`unable to parse timespan string '${val}'`);
+                }
                 source = TimeSpanTargetUnit.Milliseconds;
             } else {
                 throw new Error(`unable to convert '${val}' of type '${typeof val}' to timespan`);
@@ -290,13 +294,13 @@ export const converters = {
         };
     },
     boolean: (val: any): any => {
-        if (isNullOrUndefined(val) || isBoolean(val)) {
+        if (val === null || val === undefined || typeof val === "boolean") {
             return val;
         }
 
-        if (isNumber(val)) {
+        if (typeof val === "number") {
             return val !== 0;
-        } else if (isString(val)) {
+        } else if (typeof val === "string") {
             return ["true", "yes", "on", "1"].indexOf(val.toLowerCase()) >= 0;
         }
 
@@ -323,5 +327,6 @@ function verifyIsSection(obj: any): obj is ISection {
 }
 
 function isValueConvertFn(obj: any): obj is ValueConvertFn {
-    return !(isFunction(obj) && Object.getPrototypeOf(obj).name.length > 0);
+    // Check if it's a function and its string representation doesn't start with "class "
+    return typeof obj === "function" && !obj.toString().startsWith("class ");
 }

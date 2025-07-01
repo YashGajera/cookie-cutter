@@ -16,6 +16,7 @@ import {
 } from "@walmartlabs/cookie-cutter-core";
 import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-blob";
 import { Span, SpanContext, Tags, Tracer } from "opentracing";
+import { Readable } from "stream";
 import { IBlobStorageConfiguration, IBlobClient } from "..";
 import { streamToString } from "./helpers";
 
@@ -189,7 +190,10 @@ export class BlobClient implements IBlobClient, IRequireInitialization {
             );
             span.setTag(Tags.HTTP_STATUS_CODE, result._response.status);
 
-            return streamToString(result.readableStreamBody);
+            if (!result.readableStreamBody) {
+                throw new Error("Readable stream not available");
+            }
+            return streamToString(Readable.fromWeb(result.readableStreamBody as any));
         } catch (error) {
             this.metrics.increment(
                 BlobMetrics.ReadAsText,
